@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Логи
+logs/
+*.log
+
+# Векторная БД (слишком большие файлы)
+vector_db/chroma_db/
+*.sqlite3
+*.bin
+*.pickle
+
+# Финансовые отчеты (генерируются автоматически)
+financial_reports/*.json
+
+# Тестовые файлы
+test_embedding_result.txt
+test.py
+test_*.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Временные файлы
+*.tmp
+*.bak
