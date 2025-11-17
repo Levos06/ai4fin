@@ -4,8 +4,8 @@ Routes для управления сессиями
 from fastapi import APIRouter, HTTPException
 from typing import List
 
-from api.services.session_service import session_service
-from api.models.schemas import SessionInfo, ExportRequest
+from ..services.session_service import session_service
+from ..models.schemas import SessionInfo, ExportRequest
 
 
 router = APIRouter(prefix="/api/sessions", tags=["sessions"])

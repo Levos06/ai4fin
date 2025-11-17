@@ -7,6 +7,7 @@ python-multipart>=0.0.6
 # Зависимости из основного проекта
 langchain>=0.1.0
 langchain-core>=0.1.0
+langchain-classic>=0.1.0
 langchain-experimental>=0.0.50
 langchain-openai>=0.1.0
 chromadb>=0.4.0
@@ -20,4 +21,6 @@ numpy>=1.24.0
 yfinance>=0.2.0
 tavily-python>=0.3.0
 requests>=2.31.0
+plotly>=5.18.0
+kaleido>=0.2.1
 

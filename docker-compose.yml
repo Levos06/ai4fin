@@ -1,0 +1,45 @@
+# Load environment variables from .env file
+# Create .env file based on env.example
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: financial-agent-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+    volumes:
+      - ./vector_db:/app/vector_db
+      - ./backend/sessions:/app/backend/sessions
+      - ./charts_cache:/app/charts_cache
+      - ./logs:/app/logs
+      - ./all_documents:/app/all_documents
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: financial-agent-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  vector_db:
+  sessions:
+  charts_cache:
+  logs:
+

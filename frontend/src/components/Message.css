@@ -1,0 +1,241 @@
+.message {
+  display: flex;
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-user {
+  justify-content: flex-end;
+}
+
+.message-assistant {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  word-wrap: break-word;
+}
+
+/* Сообщения с графиками имеют максимальную ширину (90% от ширины диалогового окна) */
+.message-content.message-with-chart {
+  max-width: 85%;
+  width: 85%;
+}
+
+.message-user .message-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.message-assistant .message-content {
+  background-color: #f0f0f0;
+  color: #333;
+  border-bottom-left-radius: 0.25rem;
+}
+
+.message-error .message-content {
+  background-color: #fee;
+  color: #c33;
+  border: 1px solid #fcc;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.message-role {
+  font-weight: 600;
+}
+
+.message-time {
+  font-size: 0.75rem;
+}
+
+.message-text {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Markdown стили */
+.message-text h1,
+.message-text h2,
+.message-text h3,
+.message-text h4,
+.message-text h5,
+.message-text h6 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.message-text h1 {
+  font-size: 1.5em;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 0.3em;
+}
+
+.message-text h2 {
+  font-size: 1.3em;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 0.3em;
+}
+
+.message-text h3 {
+  font-size: 1.1em;
+}
+
+.message-text p {
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+.message-text ul,
+.message-text ol {
+  margin-bottom: 1em;
+  padding-left: 2em;
+}
+
+.message-text li {
+  margin-bottom: 0.15em;
+  line-height: 1;
+}
+
+.message-text li > p {
+  margin-bottom: 0.15em;
+}
+
+.message-text strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.message-text em {
+  font-style: italic;
+}
+
+.message-text code {
+  background-color: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.message-text pre {
+  background-color: #f4f4f4;
+  padding: 1em;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+
+.message-text pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.message-text blockquote {
+  border-left: 4px solid #dfe2e5;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 1em;
+  color: #6a737d;
+}
+
+.message-text table {
+  border-collapse: collapse;
+  margin-bottom: 1em;
+  width: 100%;
+}
+
+.message-text table th,
+.message-text table td {
+  border: 1px solid #dfe2e5;
+  padding: 0.5em;
+  text-align: left;
+}
+
+.message-text table th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+}
+
+.message-text a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.message-text a:hover {
+  text-decoration: underline;
+}
+
+.message-text hr {
+  border: none;
+  border-top: 1px solid #eaecef;
+  margin: 1.5em 0;
+}
+
+.streaming-cursor {
+  display: inline-block;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.message-footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.sources-toggle {
+  background: none;
+  border: none;
+  color: #667eea;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.sources-toggle:hover:not(:disabled) {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.sources-toggle:disabled {
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+

@@ -6,9 +6,9 @@ from typing import Dict, Any
 import json
 from datetime import datetime
 
-from api.services.agent_service import agent_service
-from api.services.session_service import session_service
-from api.models.schemas import ChatRequest, StreamChunk
+from ..services.agent_service import agent_service
+from ..services.session_service import session_service
+from ..models.schemas import ChatRequest, StreamChunk
 
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])

@@ -51,7 +51,7 @@ class SessionInfo(BaseModel):
     created_at: str  # ISO format string
     message_count: int = 0
     last_message_at: Optional[str] = None  # ISO format string
-    title: Optional[str] = None  # Название диалога (первые 10 символов первого запроса)
+    title: Optional[str] = None  # Название диалога (первые 15 символов первого запроса)
 
 
 class ExportRequest(BaseModel):

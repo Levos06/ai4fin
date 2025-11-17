@@ -4,6 +4,7 @@
 import json
 import sys
 import asyncio
+import threading
 import re
 from pathlib import Path
 from typing import AsyncGenerator, Dict, Any, Optional, List
@@ -24,8 +25,6 @@ except ImportError as e:
 
 
 # Упрощенный подход - отправляем шаги сразу после получения из результата
-
-
 class ThoughtCallbackHandler(BaseCallbackHandler):
     """Callback handler для перехвата размышлений агента в реальном времени"""
     
@@ -92,6 +91,9 @@ class ThoughtCallbackHandler(BaseCallbackHandler):
                     thought_text = thought_text.strip()
                     
                     if thought_text and len(thought_text) > 10:
+                        # НЕ обрезаем мысли на бэкенде - они должны передаваться полностью
+                        # Обрезка будет на фронтенде для визуального отображения
+                        
                         # Проверяем, не был ли уже отправлен этот thought
                         if thought_text not in self.thoughts and thought_text != self.last_thought:
                             print(f"[DEBUG] Found thought (with Thought:): {thought_text[:100]}...")
@@ -129,6 +131,9 @@ class ThoughtCallbackHandler(BaseCallbackHandler):
                         # Уменьшаем минимальную длину до 15 символов для более раннего вывода
                         if (potential_thought and len(potential_thought) > 15 and 
                             re.search(r'[а-яА-Яa-zA-Z]', potential_thought)):  # Есть буквы
+                            # НЕ обрезаем мысли на бэкенде - они должны передаваться полностью
+                            # Обрезка будет на фронтенде для визуального отображения
+                            
                             # Проверяем, не был ли уже отправлен
                             if potential_thought not in self.thoughts and potential_thought != self.last_thought:
                                 print(f"[DEBUG] Found potential thought (before Action:): {potential_thought[:100]}...")
@@ -174,6 +179,9 @@ class ThoughtCallbackHandler(BaseCallbackHandler):
                                             print(traceback.format_exc())
                                 else:
                                     print(f"[DEBUG] Thought (no markers) already sent, skipping: {clean_content[:50]}...")
+        except KeyboardInterrupt:
+            # Пробрасываем прерывание дальше
+            raise
         except Exception as e:
             # Логируем ошибку для отладки
             import traceback
@@ -214,7 +222,8 @@ class ThoughtCallbackHandler(BaseCallbackHandler):
                     'get_financial_metrics': 'Получение финансовых метрик',
                     'get_company_financials': 'Получение финансовой отчетности',
                     'search_vector_db': 'Поиск в базе знаний',
-                    'search_web': 'Поиск в интернете'
+                    'search_web': 'Поиск в интернете',
+                    'create_visualization': 'Создание визуализации'
                 }
                 tool_display_name = tool_names_ru.get(tool_name, tool_name)
                 
@@ -240,6 +249,9 @@ class ThoughtCallbackHandler(BaseCallbackHandler):
                     notification_text = f"Вызываю {tool_name_display}. Входные данные: {input_data_str}"
                 else:
                     notification_text = f"Вызываю {tool_name_display}"
+                
+                # НЕ обрезаем уведомления на бэкенде - они должны передаваться полностью
+                # Обрезка будет на фронтенде для визуального отображения
                 
                 # Отправляем уведомление через callback
                 if self.thought_callback:
@@ -284,6 +296,9 @@ class ThoughtCallbackHandler(BaseCallbackHandler):
                 
                 # Очищаем текущее действие
                 self.current_action = None
+        except KeyboardInterrupt:
+            # Пробрасываем прерывание дальше
+            raise
         except Exception as e:
             print(f"[ERROR] Error in on_tool_end: {e}")
             import traceback
@@ -295,6 +310,8 @@ class AgentService:
     
     def __init__(self):
         self.agents: Dict[str, FinancialAgent] = {}
+        self.active_threads: Dict[str, threading.Thread] = {}  # Активные потоки агента по session_id
+        self.agent_results: Dict[str, Any] = {}  # Результаты выполнения агента
         self.logger = None
         if FinancialAgent is None:
             raise ImportError("Не удалось импортировать FinancialAgent. Убедитесь, что agent.py доступен.")
@@ -339,6 +356,7 @@ class AgentService:
         Yields:
             Словари с данными для стриминга
         """
+        
         agent = self.get_agent(session_id, use_memory)
         
         try:
@@ -410,6 +428,8 @@ class AgentService:
             ) if BaseCallbackHandler else None
             
             # Запускаем агента в отдельном потоке для неблокирующего выполнения
+            agent_result = {"done": False, "result": None, "exception": None}
+            
             def run_agent():
                 try:
                     # Если есть callback handler, используем его
@@ -420,20 +440,32 @@ class AgentService:
                         )
                     else:
                         result = agent.agent_executor.invoke({"input": query})
-                    return result
+                    agent_result["result"] = result
+                    agent_result["done"] = True
                 except Exception as e:
-                    return {"error": str(e), "error_type": type(e).__name__}
+                    agent_result["result"] = {"error": str(e), "error_type": type(e).__name__}
+                    agent_result["done"] = True
+                    agent_result["exception"] = e
             
-            # Запускаем агента асинхронно
-            loop = asyncio.get_event_loop()
-            agent_task = loop.run_in_executor(None, run_agent)
+            # Сохраняем результат ДО создания потока, чтобы stop_agent мог его найти
+            self.agent_results[session_id] = agent_result
+            
+            # Запускаем агента в отдельном потоке
+            agent_thread = threading.Thread(target=run_agent, daemon=True)
+            
+            # Сохраняем поток ДО старта, чтобы stop_agent мог его найти
+            self.active_threads[session_id] = agent_thread
+            
+            # Теперь запускаем поток
+            agent_thread.start()
             
             # Обрабатываем thoughts и шаги параллельно с выполнением агента
-            while not agent_task.done():
+            while not agent_result["done"] and agent_thread.is_alive():
+                
                 try:
-                    # Сначала проверяем thoughts
+                    # Сначала проверяем thoughts (с очень коротким таймаутом для быстрой реакции на stop)
                     try:
-                        thought_data = await asyncio.wait_for(thought_queue.get(), timeout=0.05)
+                        thought_data = await asyncio.wait_for(thought_queue.get(), timeout=0.01)
                         print(f"[DEBUG] Got thought from queue: {thought_data['text'][:100]}...")
                         print(f"[DEBUG] Current thoughts list: {[t[:50] for t in current_thoughts]}")
                         if thought_data["text"] not in current_thoughts:
@@ -454,9 +486,9 @@ class AgentService:
                     except asyncio.TimeoutError:
                         pass
                     
-                    # Затем проверяем шаги
+                    # Затем проверяем шаги (с очень коротким таймаутом для быстрой реакции на stop)
                     try:
-                        step_data = await asyncio.wait_for(step_queue.get(), timeout=0.05)
+                        step_data = await asyncio.wait_for(step_queue.get(), timeout=0.01)
                         print(f"[DEBUG] Got step from queue: step {step_data.get('step_number')}")
                         # НЕ удаляем thought перед отправкой шага - мысли должны оставаться
                         # Отправляем шаг (но не показываем его в ToolStepViewer)
@@ -476,9 +508,19 @@ class AgentService:
                     print(traceback.format_exc())
                     break
             
-            # Получаем результат агента
-            result = await agent_task
+            # Ждем завершения потока
+            agent_thread.join(timeout=300)  # Максимум 5 минут
             
+            # Получаем результат агента
+            result = agent_result.get("result")
+            
+            if not result:
+                # Если результат не получен, возможно произошла ошибка
+                if agent_result.get("exception"):
+                    result = {"error": str(agent_result["exception"]), "error_type": type(agent_result["exception"]).__name__}
+                else:
+                    return
+                
             if "error" in result:
                 yield {
                     "type": "error",
@@ -591,6 +633,12 @@ class AgentService:
                     "timestamp": datetime.now().isoformat()
                 }
             }
+        finally:
+            # Очищаем поток и результат
+            if session_id in self.active_threads:
+                del self.active_threads[session_id]
+            if session_id in self.agent_results:
+                del self.agent_results[session_id]
 
 
 # Глобальный экземпляр сервиса

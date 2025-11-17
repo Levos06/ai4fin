@@ -1,0 +1,62 @@
+.tool-step-viewer {
+  background-color: #f9f9f9;
+  border-top: 1px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.tool-step-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.tool-step-number {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.tool-step-name {
+  color: #666;
+  font-family: monospace;
+}
+
+.tool-step-input {
+  margin-top: 0.5rem;
+}
+
+.tool-step-input strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.tool-step-input pre {
+  background-color: #f0f0f0;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.tool-step-result {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.tool-step-result.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.tool-step-result.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+

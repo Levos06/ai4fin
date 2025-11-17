@@ -11,7 +11,7 @@ METADATA_CSV = BASE_DIR / "all_documents.csv"
 VECTOR_DB_DIR = BASE_DIR / "vector_db" / "chroma_db"
 
 # OpenRouter API
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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")
 OPENROUTER_MODEL = "openai/text-embedding-3-large"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -29,11 +29,11 @@ VECTOR_DB_DIR.mkdir(parents=True, exist_ok=True)
 
 # Настройки агента
 AGENT_LLM_MODEL = "google/gemini-2.5-flash-lite"
-AGENT_MAX_ITERATIONS = 36  # Максимальное количество шагов агента
+AGENT_MAX_ITERATIONS = 40  # Максимальное количество шагов агента
 AGENT_VERBOSE = True  # Вывод действий агента в реальном времени
 
 # Tavily API
-TAVILY_API_KEY = "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"
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "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")
 TAVILY_SEARCH_DEPTH = "basic"  # basic или advanced
 TAVILY_MAX_RESULTS = 5  # Количество результатов веб-поиска по умолчанию
 
@@ -48,4 +48,8 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 # Сохранение финансовых отчетов
 FINANCIAL_REPORTS_DIR = BASE_DIR / "financial_reports"
 FINANCIAL_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Кэш графиков
+CHARTS_CACHE_DIR = BASE_DIR / "charts_cache"
+CHARTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -60,6 +60,10 @@ class SessionService:
             "metadata": metadata or {}
         }
         
+        # Извлекаем источники из metadata и добавляем в сообщение
+        if metadata and "sources" in metadata:
+            message["sources"] = metadata["sources"]
+        
         self.sessions[session_id]["messages"].append(message)
         self.sessions[session_id]["last_message_at"] = datetime.now().isoformat()
         self.sessions[session_id]["message_count"] = len(self.sessions[session_id]["messages"])
@@ -68,9 +72,9 @@ class SessionService:
         # Обновляем title если он None или "Новый диалог"
         current_title = self.sessions[session_id].get("title")
         if role == "user" and (current_title is None or current_title == "Новый диалог"):
-            # Берем первые 10 символов первого запроса
-            title = content.strip()[:10]
-            if len(content.strip()) > 10:
+            # Берем первые 15 символов первого запроса
+            title = content.strip()[:15]
+            if len(content.strip()) > 15:
                 title += "..."
             self.sessions[session_id]["title"] = title
         
@@ -80,7 +84,13 @@ class SessionService:
         """Получить данные сессии"""
         # Сначала проверяем в памяти (самый быстрый способ)
         if session_id in self.sessions:
-            return self.sessions[session_id]
+            session_data = self.sessions[session_id]
+            # Извлекаем источники из metadata для всех сообщений (для совместимости)
+            messages = session_data.get("messages", [])
+            for msg in messages:
+                if "sources" not in msg and msg.get("metadata", {}).get("sources"):
+                    msg["sources"] = msg["metadata"]["sources"]
+            return session_data
         
         # Пытаемся загрузить из файла
         session_file = self.sessions_dir / f"{session_id}.json"
@@ -97,13 +107,20 @@ class SessionService:
                         for msg in messages:
                             if msg.get("role") == "user":
                                 content = msg.get("content", "").strip()
-                                title = content[:10] if content else "Новый диалог"
-                                if len(content) > 10:
+                                title = content[:15] if content else "Новый диалог"
+                                if len(content) > 15:
                                     title += "..."
                                 session_data["title"] = title
                                 break
                         if "title" not in session_data:
                             session_data["title"] = "Новый диалог"
+                    
+                    # Извлекаем источники из metadata для всех сообщений (для совместимости со старыми сессиями)
+                    messages = session_data.get("messages", [])
+                    for msg in messages:
+                        if "sources" not in msg and msg.get("metadata", {}).get("sources"):
+                            msg["sources"] = msg["metadata"]["sources"]
+                    
                     # Кэшируем в памяти
                     self.sessions[session_id] = session_data
                     return session_data
@@ -130,8 +147,8 @@ class SessionService:
                         for msg in messages:
                             if msg.get("role") == "user":
                                 content = msg.get("content", "").strip()
-                                title = content[:10] if content else "Новый диалог"
-                                if len(content) > 10:
+                                title = content[:15] if content else "Новый диалог"
+                                if len(content) > 15:
                                     title += "..."
                                 session_data["title"] = title
                                 break

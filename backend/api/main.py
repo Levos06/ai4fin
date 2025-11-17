@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from api.routes import chat, sessions
+from .routes import chat, sessions
 
 
 # Создаем FastAPI приложение
@@ -19,7 +19,7 @@ app = FastAPI(
 # Настройка CORS для работы с фронтендом
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # React dev server
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost"],  # React dev server и nginx
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

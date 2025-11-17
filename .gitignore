@@ -14,7 +14,7 @@ logs/
 *.log
 
 # Векторная БД (слишком большие файлы)
-vector_db/chroma_db/
+vector_db/
 *.sqlite3
 *.bin
 *.pickle
@@ -41,3 +41,14 @@ Thumbs.db
 # Временные файлы
 *.tmp
 *.bak
+
+# Backend
+backend/sessions/
+backend/__pycache__/
+backend/**/__pycache__/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.log
