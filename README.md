@@ -2,6 +2,9 @@
 
 # Быстрый запуск Docker
 
+Запишите в .env ключи для tavily (https://www.tavily.com/) и для openrouter.
+Скачайте папку [vector_db](https://drive.google.com/file/d/1K545rsCKLqnZiQFdraH04CZ6W1Nn9Pa5/view?usp=drive_link), если запускаете через клонирование репозитория.
+
 Запустите проект из корневой директории:
 
 ```bash
